@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Enduring Order: An Interactive Exploration of Ancient Egypt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Desert Papyrus -->
+    <!-- Application Structure Plan: A thematic, single-page application with a sticky top navigation bar for easy access to five core sections: The Land (geography), The People (social structure), The Power (politics), The Legacy (achievements), and The Cities (urban planning). This non-linear structure is chosen for usability, allowing users to explore topics of interest in any order. Key interactions include a clickable social pyramid diagram to explain the hierarchy, a donut chart for population visualization, and a tabbed interface to compare planned cities. This design breaks down complex information into digestible, interactive modules, making the academic content more engaging and easier to understand than a linear report. -->
+    <!-- Visualization & Content Choices: Social Hierarchy: Goal=Organize/Compare -> Viz=Interactive HTML/CSS Pyramid -> Interaction=Click to reveal text -> Justification=Visually intuitive way to show hierarchy. Population: Goal=Inform -> Viz=Chart.js Donut Chart -> Interaction=Hover for tooltips -> Justification=Quickly shows farmer majority. City Plans: Goal=Compare -> Viz=Tabbed HTML/CSS diagrams -> Interaction=Click tabs to switch views -> Justification=Cleanly organizes parallel information for easy comparison. Ma'at Concept: Goal=Inform -> Viz=HTML/CSS visual metaphor (scales) -> Interaction=Click to reveal text -> Justification=Makes an abstract concept tangible. All interactions are powered by vanilla JS, and all visuals are created with HTML/CSS or Chart.js Canvas, adhering to the NO SVG/Mermaid constraint. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #FDF6E3; /* Papyrus Cream */
+            color: #583E2E; /* Dark Brown */
+        }
+        h1, h2, h3, .font-display {
+            font-family: 'Marcellus', serif;
+        }
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #C0A080; /* Muted Gold */
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        .pyramid-level {
+            clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%);
+            transition: all 0.3s ease-in-out;
+        }
+        .pyramid-level:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+        .pyramid-level.active {
+            filter: drop-shadow(0 0 15px #C0A080);
+            transform: scale(1.05);
+        }
+        .tab-btn.active {
+            background-color: #8B6B4D; /* Richer Brown */
+            color: #FDF6E3;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-[#FDF6E3]/80 backdrop-blur-sm sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="font-display text-2xl font-bold text-[#8B6B4D]">Ancient Egypt</div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#land" class="nav-link">The Land</a>
+                <a href="#people" class="nav-link">The People</a>
+                <a href="#power" class="nav-link">The Power</a>
+                <a href="#legacy" class="nav-link">The Legacy</a>
+                <a href="#cities" class="nav-link">The Cities</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-transparent border border-[#8B6B4D] rounded-md p-2 text-[#583E2E]">
+                    <option value="#hero">Home</option>
+                    <option value="#land">The Land</option>
+                    <option value="#people">The People</option>
+                    <option value="#power">The Power</option>
+                    <option value="#legacy">The Legacy</option>
+                    <option value="#cities">The Cities</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="min-h-[60vh] flex items-center bg-cover bg-center" style="background-image: linear-gradient(to bottom, rgba(253, 246, 227, 0.8), rgba(253, 246, 227, 1)), url('https://placehold.co/1920x1080/D2B48C/583E2E?text=Nile+Valley');">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-5xl md:text-7xl font-display text-[#8B6B4D] mb-4">The Enduring Order</h1>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto text-[#583E2E]">An interactive exploration of the society, politics, and cities that defined one of history's most influential civilizations.</p>
+            </div>
+        </section>
+
+        <section id="land" class="py-20 bg-[#F5EFE0]">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-display text-center mb-4">The Land of Two Halves</h2>
+                <p class="max-w-3xl mx-auto text-center mb-12">The geography of ancient Egypt was the bedrock of its civilization. The predictable floods of the Nile River created a fertile paradise, 'Kemet' (the Black Land), surrounded by the harsh 'Deshret' (the Red Land) of the desert. This duality shaped not only their survival but their entire worldview, creating a unified culture protected by natural barriers and centered on the life-giving river.</p>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="text-center p-8 border-2 border-[#C0A080] rounded-lg bg-[#FDF6E3] shadow-lg">
+                        <h3 class="text-2xl font-display mb-2">The Nile: Lifeblood & Highway</h3>
+                        <p>More than just a source of water and fertile silt for agriculture, the Nile was the primary artery for trade, transport, and communication. It unified the kingdom, allowing for the movement of goods, armies, and the massive stones needed for monumental construction, making it the essential tool for state control and development.</p>
+                    </div>
+                    <div class="text-center p-8 border-2 border-[#C0A080] rounded-lg bg-[#FDF6E3] shadow-lg">
+                        <h3 class="text-2xl font-display mb-2">Kemet & Deshret: Order & Chaos</h3>
+                        <p>The Egyptians saw the world in a stark contrast. The fertile black land was the realm of life, order, and civilization, while the red desert land represented death, chaos, and foreign threats. This fundamental duality was central to their religion, culture, and the pharaoh's role as the unifier who maintained cosmic balance.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="people" class="py-20">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-display text-center mb-4">A Pyramid of People</h2>
+                <p class="max-w-3xl mx-auto text-center mb-12">Ancient Egyptian society was a rigid hierarchy, with every person occupying a specific place. From the divine pharaoh at the peak to the farmers and laborers at the base, this structure was believed to reflect the cosmic order and was essential for the stability of the kingdom. Click on a level of the pyramid to learn about their role in society.</p>
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div id="pyramid-container" class="w-full max-w-sm mx-auto flex flex-col-reverse">
+                        <!-- Pyramid levels will be dynamically created by JS -->
+                    </div>
+                    <div id="pyramid-info" class="p-8 bg-[#F5EFE0] rounded-lg shadow-inner min-h-[300px] fade-in">
+                        <h3 id="info-title" class="text-3xl font-display mb-4">Select a Social Class</h3>
+                        <p id="info-text">Click on a section of the pyramid to explore the roles, responsibilities, and daily life of each class in ancient Egyptian society.</p>
+                    </div>
+                </div>
+                 <div class="mt-16">
+                    <h3 class="text-3xl font-display text-center mb-8">Population Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="population-chart"></canvas>
+                    </div>
+                    <p class="text-center mt-4 max-w-2xl mx-auto">This chart illustrates the societal structure, showing how a tiny elite relied on the labor of the vast majority of the population, who were primarily farmers and laborers.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="power" class="py-20 bg-[#F5EFE0]">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-display text-center mb-4">The Theocratic State</h2>
+                <p class="max-w-3xl mx-auto text-center mb-12">Politics and religion were inseparable in ancient Egypt. The pharaoh was not just a king but a living god, whose absolute authority was the foundation of law, order, and the state itself. This divine kingship allowed the government to command immense resources and loyalty, creating a uniquely stable and powerful centralized administration.</p>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-display mb-2">Divine Kingship</h3>
+                        <p class="mb-4">The pharaoh was the supreme political and religious leader, an intermediary between the gods and humanity. This belief granted the state unparalleled legitimacy and justified the concentration of all land, wealth, and power in the hands of the king.</p>
+                         <h3 class="text-2xl font-display mb-2 mt-8">Centralized Bureaucracy</h3>
+                        <p>To manage the kingdom, the pharaoh relied on a complex bureaucracy of officials, led by the vizier. Scribes were the backbone of this system, keeping meticulous records for taxation, resource management, and law, ensuring the efficient operation of the state.</p>
+                    </div>
+                    <div id="maat-interactive" class="p-8 bg-[#FDF6E3] rounded-lg shadow-lg text-center cursor-pointer">
+                        <div class="text-6xl mb-4">⚖️</div>
+                        <h3 class="text-2xl font-display mb-2">The Principle of Ma'at</h3>
+                        <p id="maat-text">Egyptian law was based on Ma'at—a divine concept of truth, justice, and cosmic order. Maintaining Ma'at was the pharaoh's primary duty and the goal of the legal system. <span class="font-bold text-[#8B6B4D]">(Click to learn more)</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="legacy" class="py-20">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-display text-center mb-4">A Legacy in Stone</h2>
+                <p class="max-w-3xl mx-auto text-center mb-12">The achievements of ancient Egypt, from monumental pyramids to a stable national economy, were direct results of its unique political and social system. These accomplishments were not just technical feats but powerful statements of state power, divine authority, and organizational genius.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-[#F5EFE0] p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-display mb-2">Monumental Architecture</h3>
+                        <p>The pyramids, temples, and tombs were built by a paid, mobilized workforce, demonstrating the state's incredible power to organize labor and concentrate resources. These structures were religious imperatives, built to honor the god-king and ensure cosmic order.</p>
+                    </div>
+                    <div class="bg-[#F5EFE0] p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-display mb-2">Centralized Economy</h3>
+                        <p>Egypt operated as a supply economy, with the state controlling agricultural surplus, managing trade, and storing grain in vast granaries to prevent famine. This economic control was the basis of Egypt's immense wealth and stability for millennia.</p>
+                    </div>
+                    <div class="bg-[#F5EFE0] p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-display mb-2">The First Nation-State</h3>
+                        <p>Unified around 3100 BCE, Egypt is considered the world's first nation-state. Its longevity was due not just to military might but to a shared culture and the ethical framework of Ma'at, which provided a basis for law, justice, and national identity.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cities" class="py-20 bg-[#F5EFE0]">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-display text-center mb-4">Cities by Design</h2>
+                <p class="max-w-3xl mx-auto text-center mb-12">While once debated, it's now clear Egypt was an early urban society with meticulously planned cities. These settlements, often built for specific purposes like housing pyramid builders or as new capitals, reveal the state's power to shape the landscape and organize communities. Their layouts offer clues about social structure and the extent of government control.</p>
+                <div id="cities-container">
+                    <div class="flex justify-center mb-8 border-b-2 border-[#C0A080]">
+                        <!-- Tab buttons will be dynamically created by JS -->
+                    </div>
+                    <div id="city-info-content" class="grid md:grid-cols-2 gap-8 items-center fade-in">
+                        <div id="city-text-content">
+                            <h3 id="city-name" class="text-3xl font-display mb-4"></h3>
+                            <p id="city-description"></p>
+                        </div>
+                        <div id="city-layout-diagram" class="p-6 bg-[#FDF6E3] rounded-lg shadow-inner flex flex-col items-center justify-center min-h-[250px]">
+                            <!-- Layout diagram will be dynamically created by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-[#8B6B4D] text-[#FDF6E3] py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>Interactive Report created based on "The Enduring Order: Society, Politics, and Urbanism in Ancient Egypt".</p>
+            <p class="text-sm mt-2 opacity-75">A dynamic visualization of history.</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const socialPyramidData = [
+        { name: 'Pharaoh', color: '#C0A080', height: 'h-16', description: 'The pharaoh was the absolute ruler and a living god. He owned all land, made all laws, commanded the army, and was the supreme religious leader. His divine status was the bedrock of political stability and social order.' },
+        { name: 'Vizier, Nobles & Priests', color: '#D2B48C', height: 'h-20', description: 'This elite class managed the state on behalf of the pharaoh. The vizier was the chief minister, nobles governed regions, and priests maintained the temples and performed rituals to please the gods. They lived lives of luxury and held immense power.' },
+        { name: 'Scribes, Artisans & Soldiers', color: '#E0C9A6', height: 'h-24', description: 'This middle stratum was vital to the kingdom. Scribes were literate administrators. Artisans were skilled craftspeople who created essential goods. Soldiers defended the borders and supervised state labor projects.' },
+        { name: 'Farmers, Laborers & Slaves', color: '#EAE0C8', height: 'h-28', description: 'The vast majority of the population formed the base of society. Farmers cultivated the land, paying heavy taxes. Laborers built the monumental structures. Slaves, often prisoners of war, performed forced labor for the state and elites.' }
+    ];
+
+    const citiesData = {
+        'El-Lahun': {
+            description: "A Middle Kingdom workmen's village built for pyramid construction. It shows rigid, state-controlled planning with a strict grid layout and two distinct, walled quarters separating elite administrators from the workers, demonstrating clear social segregation.",
+            layout: [
+                { type: 'title', text: 'El-Lahun Layout: Rigid Grid' },
+                { type: 'row', content: [ { text: 'Mansions (East)', color: '#D2B48C', width: 'w-1/2' }, { text: 'Workers (West)', color: '#EAE0C8', width: 'w-1/2' } ] },
+                { type: 'row', content: [ { text: 'Admin Buildings', color: '#E0C9A6', width: 'w-full' } ] },
+                { type: 'note', text: 'Walled quarters, orthogonal streets.' }
+            ]
+        },
+        'Deir el-Medina': {
+            description: "A New Kingdom village for the tomb-builders of the Valley of the Kings. It was enclosed by a wall and organized around a central street. The planning was more 'relaxed' than earlier examples, reflecting the specialized and tight-knit nature of the community.",
+             layout: [
+                { type: 'title', text: 'Deir el-Medina: Linear Village' },
+                { type: 'row', content: [ { text: 'Houses', color: '#EAE0C8', width: 'w-1/4' }, { text: 'Central Street', color: '#FDF6E3', width: 'w-1/2' }, { text: 'Houses', color: '#EAE0C8', width: 'w-1/4' } ] },
+                { type: 'note', text: 'Enclosed, connected houses.' }
+            ]
+        },
+        'Amarna': {
+            description: "Akhenaten's purpose-built capital city. While the central administrative and religious core was meticulously planned around a 'Royal Road,' the residential suburbs were surprisingly organic, with 'almost no imposed layout' and rich and poor living side-by-side.",
+            layout: [
+                { type: 'title', text: 'Amarna Layout: Core vs. Suburbs' },
+                { type: 'row', content: [ { text: 'Central City (Planned)', color: '#D2B48C', width: 'w-1/3' }, { text: 'Suburbs (Organic)', color: '#EAE0C8', width: 'w-2/3' } ] },
+                { type: 'row', content: [ { text: 'Temples & Palaces', color: '#E0C9A6', width: 'w-1/3' }, { text: 'Mixed Housing', color: '#EAE0C8', width: 'w-2/3' } ] },
+                { type: 'note', text: 'Planned core, arbitrary residential clusters.' }
+            ]
+        },
+        'Tell el-Dab\'a': {
+            description: "An early Middle Kingdom town with a strict orthogonal layout of small, identical houses within a walled perimeter. Its uniform design suggests it was a state-founded settlement, likely for a specific purpose like agricultural exploitation or as a military outpost.",
+             layout: [
+                { type: 'title', text: 'Tell el-Dab\'a: Uniform Grid' },
+                { type: 'row', content: [ { text: 'Unit', color: '#EAE0C8', width: 'w-1/4' }, { text: 'Unit', color: '#EAE0C8', width: 'w-1/4' }, { text: 'Unit', color: '#EAE0C8', width: 'w-1/4' }, { text: 'Unit', color: '#EAE0C8', width: 'w-1/4' } ] },
+                { type: 'row', content: [ { text: 'Unit', color: '#EAE0C8', width: 'w-1/4' }, { text: 'Unit', color: '#EAE0C8', width: 'w-1/4' }, { text: 'Unit', color: '#EAE0C8', width: 'w-1/4' }, { text: 'Unit', color: '#EAE0C8', width: 'w-1/4' } ] },
+                { type: 'note', text: 'Strictly orthogonal, identical housing units.' }
+            ]
+        }
+    };
+
+    const maatData = {
+        short: "Egyptian law was based on Ma'at—a divine concept of truth, justice, and cosmic order. Maintaining Ma'at was the pharaoh's primary duty and the goal of the legal system. <span class='font-bold text-[#8B6B4D]'>(Click to learn more)</span>",
+        long: "Ma'at was a fluid and organic legal framework, not a rigid code. It guided judges, who were instructed to be impartial, and gave citizens a basis for justice, even allowing for appeals through divine oracles. This ethical system provided profound political legitimacy and social cohesion, ensuring the state's long-term stability."
+    };
+
+    function initPyramid() {
+        const container = document.getElementById('pyramid-container');
+        const infoTitle = document.getElementById('info-title');
+        const infoText = document.getElementById('info-text');
+
+        socialPyramidData.forEach((level, index) => {
+            const levelDiv = document.createElement('div');
+            levelDiv.className = `pyramid-level w-full ${level.height} cursor-pointer flex items-center justify-center text-center p-2`;
+            levelDiv.style.backgroundColor = level.color;
+            levelDiv.innerHTML = `<span class="font-display text-sm md:text-base text-[#583E2E] font-bold">${level.name}</span>`;
+            
+            levelDiv.addEventListener('click', () => {
+                infoTitle.textContent = level.name;
+                infoText.textContent = level.description;
+                document.getElementById('pyramid-info').classList.remove('fade-in');
+                void document.getElementById('pyramid-info').offsetWidth;
+                document.getElementById('pyramid-info').classList.add('fade-in');
+
+                document.querySelectorAll('.pyramid-level').forEach(el => el.classList.remove('active'));
+                levelDiv.classList.add('active');
+            });
+
+            container.appendChild(levelDiv);
+        });
+    }
+
+    function initPopulationChart() {
+        const ctx = document.getElementById('population-chart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Farmers & Laborers', 'Scribes, Artisans, Soldiers', 'Elites (Nobles & Priests)', 'Pharaoh & Royal Family'],
+                datasets: [{
+                    label: 'Population Distribution',
+                    data: [85, 10, 4.5, 0.5],
+                    backgroundColor: [
+                        '#EAE0C8',
+                        '#E0C9A6',
+                        '#D2B48C',
+                        '#C0A080'
+                    ],
+                    borderColor: '#FDF6E3',
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#583E2E',
+                            font: {
+                                family: "'Roboto', sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: approx. ${context.raw}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function initMaat() {
+        const container = document.getElementById('maat-interactive');
+        const textElement = document.getElementById('maat-text');
+        let isLongText = false;
+
+        container.addEventListener('click', () => {
+            isLongText = !isLongText;
+            textElement.innerHTML = isLongText ? maatData.long : maatData.short;
+            container.classList.remove('fade-in');
+            void container.offsetWidth;
+            container.classList.add('fade-in');
+        });
+    }
+
+    function initCities() {
+        const tabsContainer = document.querySelector('#cities-container .flex');
+        const cityNameEl = document.getElementById('city-name');
+        const cityDescEl = document.getElementById('city-description');
+        const cityLayoutEl = document.getElementById('city-layout-diagram');
+        const cityInfoContent = document.getElementById('city-info-content');
+
+        const cityNames = Object.keys(citiesData);
+
+        function updateCityContent(cityName) {
+            const city = citiesData[cityName];
+            cityNameEl.textContent = cityName;
+            cityDescEl.textContent = city.description;
+            
+            cityLayoutEl.innerHTML = '';
+            city.layout.forEach(item => {
+                if (item.type === 'title') {
+                    const title = document.createElement('h4');
+                    title.className = 'text-xl font-display mb-4';
+                    title.textContent = item.text;
+                    cityLayoutEl.appendChild(title);
+                } else if (item.type === 'row') {
+                    const row = document.createElement('div');
+                    row.className = 'w-full flex gap-2 mb-2';
+                    item.content.forEach(block => {
+                        const div = document.createElement('div');
+                        div.className = `${block.width} p-2 text-xs text-center rounded`;
+                        div.style.backgroundColor = block.color;
+                        div.textContent = block.text;
+                        row.appendChild(div);
+                    });
+                    cityLayoutEl.appendChild(row);
+                } else if (item.type === 'note') {
+                    const note = document.createElement('p');
+                    note.className = 'text-sm text-center mt-4 opacity-75';
+                    note.textContent = item.text;
+                    cityLayoutEl.appendChild(note);
+                }
+            });
+
+            cityInfoContent.classList.remove('fade-in');
+            void cityInfoContent.offsetWidth;
+            cityInfoContent.classList.add('fade-in');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === cityName);
+            });
+        }
+
+        cityNames.forEach(name => {
+            const button = document.createElement('button');
+            button.className = 'tab-btn font-display px-4 py-2 -mb-px border-b-2 border-transparent transition-all duration-300';
+            button.textContent = name;
+            button.addEventListener('click', () => updateCityContent(name));
+            tabsContainer.appendChild(button);
+        });
+
+        updateCityContent(cityNames[0]);
+    }
+    
+    function initNavScroll() {
+        const links = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('main section');
+        const mobileNav = document.getElementById('mobile-nav');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    links.forEach(link => {
+                        link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+
+        sections.forEach(section => observer.observe(section));
+        
+        mobileNav.addEventListener('change', (e) => {
+            const targetId = e.target.value;
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+
+    initPyramid();
+    initPopulationChart();
+    initMaat();
+    initCities();
+    initNavScroll();
+});
+</script>
+</body>
+</html>
+
