@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Desert Papyrus -->
-    <!-- Application Structure Plan: A thematic, single-page application with a sticky top navigation bar for easy access to five core sections: The Land (geography), The People (social structure), The Power (politics), The Legacy (achievements), and The Cities (urban planning). This non-linear structure is chosen for usability, allowing users to explore topics of interest in any order. Key interactions include a clickable social pyramid diagram to explain the hierarchy, a donut chart for population visualization, and a tabbed interface to compare planned cities. This design breaks down complex information into digestible, interactive modules, making the academic content more engaging and easier to understand than a linear report. -->
-    <!-- Visualization & Content Choices: Social Hierarchy: Goal=Organize/Compare -> Viz=Interactive HTML/CSS Pyramid -> Interaction=Click to reveal text -> Justification=Visually intuitive way to show hierarchy. Population: Goal=Inform -> Viz=Chart.js Donut Chart -> Interaction=Hover for tooltips -> Justification=Quickly shows farmer majority. City Plans: Goal=Compare -> Viz=Tabbed HTML/CSS diagrams -> Interaction=Click tabs to switch views -> Justification=Cleanly organizes parallel information for easy comparison. Ma'at Concept: Goal=Inform -> Viz=HTML/CSS visual metaphor (scales) -> Interaction=Click to reveal text -> Justification=Makes an abstract concept tangible. All interactions are powered by vanilla JS, and all visuals are created with HTML/CSS or Chart.js Canvas, adhering to the NO SVG/Mermaid constraint. -->
+    <!-- Application Structure Plan: A thematic, single-page application with a sticky top navigation bar for easy access to five core sections: The Land (geography), The People (social structure), The Power (politics), The Legacy (achievements), and The Cities (urban planning). This non-linear structure is chosen for usability, allowing users to explore topics of interest in any order. Key interactions include a clickable social pyramid diagram to explain the hierarchy, a donut chart for population visualization, and a tabbed interface to compare planned cities. A new link in the footer allows users to access a supplementary file like a full report. This design breaks down complex information into digestible, interactive modules, making the academic content more engaging and easier to understand than a linear report. -->
+    <!-- Visualization & Content Choices: Social Hierarchy: Goal=Organize/Compare -> Viz=Interactive HTML/CSS Pyramid -> Interaction=Click to reveal text -> Justification=Visually intuitive way to show hierarchy. Population: Goal=Inform -> Viz=Chart.js Donut Chart -> Interaction=Hover for tooltips -> Justification=Quickly shows farmer majority. City Plans: Goal=Compare -> Viz=Tabbed HTML/CSS diagrams -> Interaction=Click tabs to switch views -> Justification=Cleanly organizes parallel information for easy comparison. Ma'at Concept: Goal=Inform -> Viz=HTML/CSS visual metaphor (scales) -> Interaction=Click to reveal text -> Justification=Makes an abstract concept tangible. A supplementary file link is added to the footer for user convenience. All interactions are powered by vanilla JS, and all visuals are created with HTML/CSS or Chart.js Canvas, adhering to the NO SVG/Mermaid constraint. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
@@ -217,7 +217,8 @@
 
     <footer class="bg-[#8B6B4D] text-[#FDF6E3] py-8">
         <div class="container mx-auto px-6 text-center">
-            <p>Interactive Report created based on "The Enduring Order: Society, Politics, and Urbanism in Ancient Egypt".</p>
+            <p class="mb-4">Interactive Report created based on "The Enduring Order: Society, Politics, and Urbanism in Ancient Egypt".</p>
+            <a href="https://github.com/rakibulsagor/ancient-egypt-report/blob/main/Egyptian%20Civilization%3ASociety%20and%20Politics.pdf" download class="inline-block px-6 py-2 bg-[#D2B48C] text-[#583E2E] font-bold rounded-lg shadow-lg hover:bg-[#C0A080] transition-colors">Download the Full Report</a>
             <p class="text-sm mt-2 opacity-75">A dynamic visualization of history.</p>
         </div>
     </footer>
@@ -454,4 +455,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
